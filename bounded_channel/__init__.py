@@ -81,7 +81,8 @@ spawn a task to manage the socket and use a channel to synchronize.
 The mpsc and oneshot channels can be combined to provide a request / response type
 synchronization pattern with a shared resource.
 A task is spawned to synchronize a resource and waits on commands received on `bounded_channel`.
-Each command includes a [`oneshot_channel`](https://pypi.org/project/babichjacob-oneshot-channel/) `Sender` on which the result of the command is sent.
+Each command includes a [`oneshot_channel`](https://pypi.org/project/babichjacob-oneshot-channel/)
+`Sender` on which the result of the command is sent.
 
 
 Each task sends an “fetch and increment” command.
