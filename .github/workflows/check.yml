@@ -28,5 +28,5 @@ jobs:
       - run: poetry install
       - run: poetry run mypy .
       - run: poetry run black . --check
-      - run: poetry run pylint bounded_channel
+      - run: poetry run pylint bounded_channel tests
       # Testing is not checked in this workflow (I am not sure if it should be yet)
