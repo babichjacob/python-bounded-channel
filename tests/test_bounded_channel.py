@@ -1,3 +1,5 @@
+"Test bounded channels"
+
 from asyncio import create_task, gather, sleep
 from time import time
 
@@ -8,6 +10,8 @@ from bounded_channel import Receiver, Sender, bounded_channel
 
 
 async def producer_finishes_first(sender: Sender[int]):
+    "Send values 10, 17, ..., 94 faster than the consumer can receive/process them all"
+
     value = 3
     while True:
         value += 7
@@ -25,6 +29,11 @@ async def producer_finishes_first(sender: Sender[int]):
 
 
 async def consumer_is_slower(receiver: Receiver[int]):
+    """
+    Receive values 10, 17, ..., 94 slower than they are produced
+    (because of deliberately sleeping to mimic intensive work)
+    """
+
     started = time()
     actual_values = []
     sleep_time = 0.1
@@ -46,6 +55,8 @@ async def consumer_is_slower(receiver: Receiver[int]):
 
 @pytest.mark.asyncio
 async def test_producer_finishes_first():
+    "Test that things behave as expected when the producer finishes before the consumer"
+
     (sender, receiver) = bounded_channel(4)
 
     producer_task = create_task(producer_finishes_first(sender))
@@ -84,6 +95,11 @@ CONSUMER_FINISHES_FIRST_BUFFER = 16
 
 
 async def producer_is_slower(sender: Sender[int]):
+    """
+    Produce values 99, 98, 97, ... until the receiver is dropped (in this case at 80)
+    and slower than the consumer receives / processes them
+    """
+
     started = time()
     actual_values = []
     sleep_time = 0.05
@@ -119,6 +135,11 @@ async def producer_is_slower(sender: Sender[int]):
 
 
 async def consumer_finishes_first(receiver: Receiver[int]):
+    """
+    Receive values until the expected number of them (20) are received
+    and at a rate faster than the producer can send them
+    """
+
     expected_length = len(CONSUMER_FINISHES_FIRST_EXPECTED_VALUES)
 
     started = time()
@@ -147,6 +168,7 @@ async def consumer_finishes_first(receiver: Receiver[int]):
 
 @pytest.mark.asyncio
 async def test_consumer_finishes_first():
+    "Test that things behave as expected when the consumer finishes before the producer"
     (sender, receiver) = bounded_channel(CONSUMER_FINISHES_FIRST_BUFFER)
 
     producer_task = create_task(producer_is_slower(sender))
