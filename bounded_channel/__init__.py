@@ -14,7 +14,133 @@ and the task will be notified when additional capacity is available.
 In other words, the channel provides backpressure.
 
 This channel is also suitable for the single-producer single-consumer use-case.
-(Unless you only need to send one message, in which case you should use the oneshot channel.)
+(Unless you only need to send one message, in which case you should use
+the [`oneshot` channel](https://pypi.org/project/babichjacob-oneshot-channel/).)
+
+# Disconnection
+When all `Sender` handles have been dropped,
+it is no longer possible to send values into the channel.
+This is considered the termination event of the stream.
+As such, `Receiver.recv` returns `NONE()`.
+
+If the `Receiver` handle is dropped, then messages can no longer be read out of the channel.
+In this case, all further attempts to send will result in an error.
+
+# Examples
+
+## Using a bounded channel to incrementally stream the results of a series of computations
+
+>>> async def some_computation(input: int) -> str:
+...     return f"the result of computation {input}"
+
+>>> async def producer(tx: Sender[str]):
+...     for i in range(10):
+...         res = await some_computation(i);
+...         (await tx.send(res)).unwrap()
+
+>>> async def main():
+...     (tx, rx) = bounded_channel(100);
+...
+...     create_task(producer(tx))
+...     del tx # Remove this extra reference to the Sender to ensure proper RAII behavior
+...
+...     async for res in rx:
+...         print("got =", res)
+
+>>> from asyncio import run
+>>> run(main())
+got = the result of computation 0
+got = the result of computation 1
+got = the result of computation 2
+got = the result of computation 3
+got = the result of computation 4
+got = the result of computation 5
+got = the result of computation 6
+got = the result of computation 7
+got = the result of computation 8
+got = the result of computation 9
+
+
+The argument to `bounded_channel` is the channel capacity.
+This is the maximum number of values that can be stored in the channel
+pending receipt at any given time.
+Properly setting this value is key in implementing robust programs
+as the channel capacity plays a critical part in handling back pressure.
+
+A common concurrency pattern for resource management is to spawn a task
+dedicated to managing that resource and using message passing
+between other tasks to interact with the resource.
+The resource may be anything that may not be concurrently used.
+Some examples include a socket and program state.
+For example, if multiple tasks need to send data over a single socket,
+spawn a task to manage the socket and use a channel to synchronize.
+
+
+## Using a task to synchronize an integer counter
+
+The mpsc and oneshot channels can be combined to provide a request / response type
+synchronization pattern with a shared resource.
+A task is spawned to synchronize a resource and waits on commands received on `bounded_channel`.
+Each command includes a [`oneshot_channel`](https://pypi.org/project/babichjacob-oneshot-channel/) `Sender` on which the result of the command is sent.
+
+
+Each task sends an “fetch and increment” command.
+The counter value **before** the increment is sent over the provided `oneshot` channel.
+
+>>> from asyncio import gather
+
+>>> class Increment(): pass
+>>> # Other commands can be added here
+>>> Command = Increment
+
+>>> import oneshot_channel
+
+>>> async def manage_counter(cmd_rx: Receiver[tuple[Command, oneshot_channel.Sender[int]]]):
+...     counter = 0
+...     async for (cmd, response) in cmd_rx:
+...         match cmd:
+...             case Increment():
+...                 prev = counter
+...                 counter += 1
+...                 response.send(prev).unwrap();
+
+>>> async def send_increment_commands(cmd_tx: Sender[tuple[Command, oneshot_channel.Sender[int]]]):
+...     resp_tx, resp_rx = oneshot_channel.oneshot_channel();
+...
+...     (await cmd_tx.send((Increment(), resp_tx))).ok().unwrap()
+...     res = (await resp_rx).unwrap()
+...
+...     print("previous value =", res)
+
+>>> async def main():
+...     cmd_tx, cmd_rx = bounded_channel(100)
+...
+...     # Spawn a task to manage the counter
+...     create_task(manage_counter(cmd_rx))
+...     del cmd_rx # Remove this extra reference to the Receiver to ensure proper RAII behavior
+...
+...     tasks = []
+...
+...     # Spawn tasks that will send the increment command
+...     for _ in range(10):
+...         tasks.append(send_increment_commands(cmd_tx))
+...     del cmd_tx # Remove this extra reference to the Sender to ensure proper RAII behavior
+...
+...     # Wait for all tasks to complete
+...     await gather(*tasks)
+
+>>> from asyncio import run
+>>> run(main())
+previous value = 0
+previous value = 1
+previous value = 2
+previous value = 3
+previous value = 4
+previous value = 5
+previous value = 6
+previous value = 7
+previous value = 8
+previous value = 9
 """
 
 

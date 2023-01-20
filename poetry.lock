@@ -51,6 +51,21 @@ tests = ["attrs[tests-no-zope]", "zope.interface"]
 tests-no-zope = ["cloudpickle", "cloudpickle", "hypothesis", "hypothesis", "mypy (>=0.971,<0.990)", "mypy (>=0.971,<0.990)", "pympler", "pympler", "pytest (>=4.3.0)", "pytest (>=4.3.0)", "pytest-mypy-plugins", "pytest-mypy-plugins", "pytest-xdist[psutil]", "pytest-xdist[psutil]"]
 
 [[package]]
+name = "babichjacob-oneshot-channel"
+version = "0.1.0"
+description = "TODO"
+category = "dev"
+optional = false
+python-versions = ">=3.10"
+files = [
+    {file = "babichjacob_oneshot_channel-0.1.0-py3-none-any.whl", hash = "sha256:9f4e5e5ea9ee0880a95f7e45292ae0cf941e976388387da1113dc6e39ca8d9b2"},
+    {file = "babichjacob_oneshot_channel-0.1.0.tar.gz", hash = "sha256:648ccb0341df27196d4540d29e9c06e9b3316351724d84d069ce7298ace54498"},
+]
+
+[package.dependencies]
+babichjacob-option-and-result = ">=0.1.2,<0.2.0"
+
+[[package]]
 name = "babichjacob-option-and-result"
 version = "0.1.2"
 description = "A Python implementation of Rust's Option and Result"
@@ -556,4 +571,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10"
-content-hash = "5fd5216f97f8b36f679ada1499952b68920785a294ae9109d91bd94807ca90af"
+content-hash = "adedf7921e44eddf1f322a41268f3b6c38e75d239fce14550e928ce550340b45"
