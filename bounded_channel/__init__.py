@@ -145,15 +145,15 @@ previous value = 9
 """
 
 
-from asyncio import FIRST_COMPLETED, Event, Queue, create_task, wait
+from asyncio import FIRST_COMPLETED, CancelledError, Event, Queue, create_task, wait
 from dataclasses import dataclass
 from typing import AsyncIterator, Generic, TypeVar
 
 from option_and_result import (
+    NONE,
     Err,
     MatchesNone,
     MatchesSome,
-    NONE,
     Ok,
     Option,
     Result,
@@ -225,9 +225,14 @@ class Sender(Generic[T]):
 
         closed_event = create_task(self._closed.wait())
         put_task = create_task(self._queue.put(value))
-        done, _pending = await wait(
-            [put_task, closed_event], return_when=FIRST_COMPLETED
-        )
+        try:
+            done, _pending = await wait(
+                [put_task, closed_event], return_when=FIRST_COMPLETED
+            )
+        except CancelledError:
+            closed_event.cancel()
+            put_task.cancel()
+            raise
 
         if closed_event in done:
             put_task.cancel()
@@ -355,9 +360,14 @@ class Receiver(Generic[T]):
 
         disconnected_event = create_task(self._disconnected.wait())
         get_task = create_task(self._queue.get())
-        done, _pending = await wait(
-            [get_task, disconnected_event], return_when=FIRST_COMPLETED
-        )
+        try:
+            done, _pending = await wait(
+                [get_task, disconnected_event], return_when=FIRST_COMPLETED
+            )
+        except CancelledError:
+            disconnected_event.cancel()
+            get_task.cancel()
+            raise
 
         if disconnected_event in done:
             get_task.cancel()
