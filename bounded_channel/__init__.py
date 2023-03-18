@@ -152,8 +152,6 @@ from typing import AsyncIterator, Generic, TypeVar
 from option_and_result import (
     NONE,
     Err,
-    MatchesNone,
-    MatchesSome,
     Ok,
     Option,
     Result,
@@ -392,11 +390,11 @@ class Receiver(Generic[T]):
 
         if self._disconnected.is_set():
             # Not actually a type error but Pylance (in VS Code) thinks it is
-            return Err(TryRecvErrorDisconnected)  # type: ignore
+            return Err(TryRecvErrorDisconnected())  # type: ignore
 
         if self._queue.empty():
             # Not actually a type error but Pylance (in VS Code) thinks it is
-            return Err(TryRecvErrorEmpty)  # type: ignore
+            return Err(TryRecvErrorEmpty())  # type: ignore
 
         # This cannot raise an exception given the guards above
         return Ok(self._queue.get_nowait())
@@ -404,11 +402,11 @@ class Receiver(Generic[T]):
     async def __aiter__(self) -> AsyncIterator[T]:
         while True:
             received = await self.recv()
-            match received.to_matchable():
-                case MatchesSome(value):
-                    yield value
-                case MatchesNone():
-                    return
+
+            if received.is_none():
+                return
+
+            yield received.unwrap()
 
     def close(self):
         """
