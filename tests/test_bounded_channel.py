@@ -6,7 +6,7 @@ from time import time
 import pytest
 
 from option_and_result import MatchesErr, MatchesOk
-from channel import Receiver, Sender, channel
+from bounded_channel import Receiver, Sender, channel
 
 
 async def producer_finishes_first(sender: Sender[int]):
