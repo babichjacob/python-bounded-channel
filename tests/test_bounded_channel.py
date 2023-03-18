@@ -6,7 +6,7 @@ from time import time
 import pytest
 
 from option_and_result import MatchesErr, MatchesOk
-from bounded_channel import Receiver, Sender, bounded_channel
+from channel import Receiver, Sender, channel
 
 
 async def producer_finishes_first(sender: Sender[int]):
@@ -57,7 +57,7 @@ async def consumer_is_slower(receiver: Receiver[int]):
 async def test_producer_finishes_first():
     "Test that things behave as expected when the producer finishes before the consumer"
 
-    (sender, receiver) = bounded_channel(4)
+    (sender, receiver) = channel(4)
 
     producer_task = create_task(producer_finishes_first(sender))
     consumer_task = create_task(consumer_is_slower(receiver))
@@ -169,7 +169,7 @@ async def consumer_finishes_first(receiver: Receiver[int]):
 @pytest.mark.asyncio
 async def test_consumer_finishes_first():
     "Test that things behave as expected when the consumer finishes before the producer"
-    (sender, receiver) = bounded_channel(CONSUMER_FINISHES_FIRST_BUFFER)
+    (sender, receiver) = channel(CONSUMER_FINISHES_FIRST_BUFFER)
 
     producer_task = create_task(producer_is_slower(sender))
     consumer_task = create_task(consumer_finishes_first(receiver))

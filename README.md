@@ -47,7 +47,7 @@ async def consumer(receiver: Receiver[int]):
 
 
 async def main():
-    sender, receiver = bounded_channel(64)
+    sender, receiver = channel(64)
 
     producer_task = create_task(producer(sender))
     consumer_task = create_task(consumer(receiver))

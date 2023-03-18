@@ -39,7 +39,7 @@ In this case, all further attempts to send will result in an error.
 ...         (await tx.send(res)).unwrap()
 
 >>> async def main():
-...     (tx, rx) = bounded_channel(100);
+...     (tx, rx) = channel(100);
 ...
 ...     create_task(producer(tx))
 ...     del tx # Remove this extra reference to the Sender to ensure proper RAII behavior
@@ -114,7 +114,7 @@ The counter value **before** the increment is sent over the provided `oneshot` c
 ...     print("previous value =", res)
 
 >>> async def main():
-...     cmd_tx, cmd_rx = bounded_channel(100)
+...     cmd_tx, cmd_rx = channel(100)
 ...
 ...     # Spawn a task to manage the counter
 ...     create_task(manage_counter(cmd_rx))
@@ -427,7 +427,7 @@ class Receiver(Generic[T]):
         self.close()
 
 
-def bounded_channel(buffer: int) -> tuple[Sender[T], Receiver[T]]:
+def channel(buffer: int) -> tuple[Sender[T], Receiver[T]]:
     """
     Creates a bounded channel for communicating between asynchronous tasks with backpressure.
 
