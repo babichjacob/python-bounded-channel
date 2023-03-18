@@ -106,7 +106,7 @@ The counter value **before** the increment is sent over the provided `oneshot` c
 ...                 response.send(prev).unwrap();
 
 >>> async def send_increment_commands(cmd_tx: Sender[tuple[Command, oneshot_channel.Sender[int]]]):
-...     resp_tx, resp_rx = oneshot_channel.oneshot_channel();
+...     resp_tx, resp_rx = oneshot_channel.channel();
 ...
 ...     (await cmd_tx.send((Increment(), resp_tx))).ok().unwrap()
 ...     res = (await resp_rx).unwrap()
