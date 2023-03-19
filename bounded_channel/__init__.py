@@ -147,7 +147,7 @@ previous value = 9
 
 from asyncio import FIRST_COMPLETED, CancelledError, Event, Queue, create_task, wait
 from dataclasses import dataclass
-from typing import AsyncIterator, Generic, TypeVar
+from typing import AsyncIterator, Generic, TypeVar, Union
 
 from option_and_result import (
     NONE,
@@ -253,7 +253,7 @@ class Sender(Generic[T]):
 
     def try_send(
         self, value: T
-    ) -> Result[None, TrySendErrorFull[T] | TrySendErrorClosed[T]]:
+    ) -> Result[None, Union[TrySendErrorFull[T], TrySendErrorClosed[T]]]:
         """
         Attempts to immediately send a message on this `Sender`
 
@@ -377,7 +377,7 @@ class Receiver(Generic[T]):
             self._disconnected.set()
         return Some(get_task.result())
 
-    def try_recv(self) -> Result[T, TryRecvErrorEmpty | TryRecvErrorDisconnected]:
+    def try_recv(self) -> Result[T, Union[TryRecvErrorEmpty, TryRecvErrorDisconnected]]:
         """
         Tries to receive the next value for this receiver.
 

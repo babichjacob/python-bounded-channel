@@ -57,14 +57,14 @@ babichjacob-option-and-result = ">=0.2.0,<0.3.0"
 
 [[package]]
 name = "babichjacob-option-and-result"
-version = "0.2.0"
+version = "0.2.3"
 description = "A Python implementation of Rust's Option and Result"
 category = "main"
 optional = false
 python-versions = ">=3.0,<4.0"
 files = [
-    {file = "babichjacob_option_and_result-0.2.0-py3-none-any.whl", hash = "sha256:c2f03d7d562d420a08140017bb3d05c65df783663d64efe816f4dd44b71558a4"},
-    {file = "babichjacob_option_and_result-0.2.0.tar.gz", hash = "sha256:ac2577aebd2b3cece7a9b75174fa62ed9416e7affe6f8c77f21914d03146964d"},
+    {file = "babichjacob_option_and_result-0.2.3-py3-none-any.whl", hash = "sha256:bac084ccb0c0771cf8ad2addb63f9451345e7e9d90363ba2570eb3cfb5ef4f38"},
+    {file = "babichjacob_option_and_result-0.2.3.tar.gz", hash = "sha256:0952ad5c1d9d4fdc118d4400094015dbb7bc1390a76c0c42201c97d348bb8a1e"},
 ]
 
 [[package]]
