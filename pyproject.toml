@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "babichjacob-bounded-channel"
-version = "0.3.2"
+version = "0.3.3"
 description = "A Python implementation of tokio::sync::mpsc::channel"
 license = "MIT"
 authors = ["J or Jacob Babich <jacobbabichpublic+git@gmail.com>"]
